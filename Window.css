@@ -2,10 +2,8 @@
 div.window {
     background: #888;
     position: absolute;
-    left: 100px;
-    top: 100px;
     cursor: default;
-    padding: 2px;
+    padding: 2px;		/*  Visible sizers width */
     user-select: none;
     -moz-user-select: none;
 }

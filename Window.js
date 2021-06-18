@@ -82,7 +82,37 @@ class Window {
     this.div.appendChild( this.divBar );
     this.div.appendChild( this.divWork );
 
+    //  Use an observer to center the window
+    //    Kill it after a while
+    //
+    this.observer = new ResizeObserver(this.center.bind(this));
+    this.observer.observe(this.div);
+    setTimeout( this.killObserver.bind(this), 100 );
+    
     document.body.appendChild(this.div);
+  }
+
+  killObserver ( ) {
+    this.observer.disconnect();
+    this.observer = undefined ;
+  }
+
+  //  Center window
+  //
+  center ( ) {
+    // let cs = window.getComputedStyle(this.div) ;
+    // let w = this.div.offsetWidth - parseFloat(cs.paddingLeft)
+    //   - parseFloat(cs.paddingRight) - parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth);
+    // let h = this.div.offsetHeight - parseFloat(cs.paddingTop)
+    //   - parseFloat(cs.paddingBottom) - parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth);
+    // w = parseInt(cs.width);
+    // h = parseInt(cs.height);
+    let w = this.div.offsetWidth;
+    let h = this.div.offsetHeight;
+    trace(" r=("+window.innerWidth+","+window.innerHeight+") ");
+    trace(" w="+w+", h="+h);
+    this.div.style.left = window.innerWidth/2-w/2+"px";
+    this.div.style.top = window.innerHeight/2-h/2+"px";
   }
 
   //  Start of operation
@@ -154,5 +184,10 @@ class Window {
     Window.eatEvent(ev);
     document.body.removeChild(this.gnd);
     this.gnd = undefined ;
+  }
+
+  setTitle ( html ) {
+    this.divBar.innerHTML = html ;
+    return this;
   }
 }

@@ -25,11 +25,9 @@ function main ( )
 
   loadCss( "Window.css" );
   
-  let w = new Window();
-  w.divBar.innerHTML = "Window 1";
+  let w = new Window().setTitle("Window 1");
   
-  w = new Window();
-  w.divBar.innerHTML = "Console";
+  w = new Window().setTitle("Console");
   w.divWork.id = "console";
 
   console.redirect(true);
