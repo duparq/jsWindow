@@ -1,0 +1,21 @@
+
+* {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 10pt;
+}
+
+body {
+    margin: 0px;
+    border: 0px;
+    overflow: hidden;
+}
+
+#console {
+    white-space: pre-wrap;
+    font-family: monospace;
+    font-size: 11pt;
+    overflow: auto;
+    color: gold;
+    background-color: black;
+    padding: 4px;
+}

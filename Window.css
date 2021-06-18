@@ -1,0 +1,69 @@
+
+div.window {
+    background: #888;
+    position: absolute;
+    left: 100px;
+    top: 100px;
+    cursor: default;
+    padding: 2px;
+    user-select: none;
+    -moz-user-select: none;
+}
+
+div.window div.bar {
+    position: relative;
+    background: #aaa;
+    text-align: center;
+}
+
+div.window div.workarea {
+    position: relative;
+    display: block;
+    min-width: 200px;
+    min-height: 100px;
+    width: 400px;
+    height: 200px;
+    background: #ddd;
+}
+
+div.window td {
+    padding: 0;
+}
+
+div.window .sizer-nw {
+    width: 12px;
+    height: 12px;
+    cursor: nw-resize;    
+}
+
+div.window .sizer-n {
+    cursor: n-resize;    
+}
+
+div.window .sizer-ne {
+    width: 12px;
+    cursor: ne-resize;    
+}
+
+div.window .sizer-w {
+    cursor: w-resize;    
+}
+
+div.window .sizer-e {
+    cursor: e-resize;    
+}
+
+div.window .sizer-sw {
+    width: 12px;
+    height: 12px;
+    cursor: sw-resize;    
+}
+
+div.window .sizer-s {
+    cursor: s-resize;    
+}
+
+div.window .sizer-se {
+    width: 12px;
+    cursor: se-resize;    
+}
