@@ -6,21 +6,29 @@ div.window {
     padding: 2px;		/*  Visible sizers width */
     user-select: none;
     -moz-user-select: none;
+
+    box-sizing: border-box;
+    min-width: 200px;
+    min-height: 100px;
+    width: 400px;
+    height: 200px;
 }
 
 div.window div.bar {
     position: relative;
     background: #aaa;
     text-align: center;
+    padding: 2px;
 }
 
-div.window div.workarea {
+div.window div.area {
     position: relative;
     display: block;
-    min-width: 200px;
-    min-height: 100px;
-    width: 400px;
-    height: 200px;
+    box-sizing: border-box;
+    /* min-width: 200px; */
+    /* min-height: 100px; */
+    /* width: 400px; */
+    /* height: 200px; */
     background: #ddd;
 }
 

@@ -2,17 +2,17 @@
 //  A window is made of a DIV containing:
 //    * a background TABLE that handles events for resizing
 //    * divBar: title bar DIV
-//    * divWork: work area DIV
+//    * divArea: work area DIV
 //
 class Window {
 
-  //  Transform matrices
+  //  Matrices for window move/resize
   //    [dx,dy]*[m] => [left,top,width,height]
   //
   static mSizeNW = [ 1, 1, -1, -1 ];
   static mSizeN  = [ 0, 1,  0, -1 ];
   static mSizeNE = [ 0, 1,  1, -1 ];
-  static mSizeW  = [ 1, 1, -1,  0 ];
+  static mSizeW  = [ 1, 0, -1,  0 ];
   static mSizeE  = [ 0, 0,  1,  0 ];
   static mSizeSW = [ 1, 0, -1,  1 ];
   static mSizeS  = [ 0, 0,  0,  1 ];
@@ -24,10 +24,15 @@ class Window {
     ev.preventDefault();
   }
 
-  //  Create a new window and append it to the document body
+  //  Create a new window, append its DIV to the document body
   //
-  constructor ( ) {
-    trace();
+  constructor ( props={} ) {
+    const { left,
+	    top,
+	    width,
+	    height,
+	    title,
+	  } = props;
 
     //  Create a table of 3x3 cells that will handle window transformation
     //
@@ -43,116 +48,117 @@ class Window {
     tr = document.createElement("tr"); table.appendChild(tr);
     td = document.createElement("td"); tr.appendChild(td);
     td.classList = "sizer-nw";
-    td.addEventListener("mousedown", this.opStart.bind(this, Window.mSizeNW) );
+    td.onpointerdown = this.opStart.bind(this, Window.mSizeNW);
     td = document.createElement("td"); tr.appendChild(td);
     td.classList = "sizer-n";
-    td.addEventListener("mousedown", this.opStart.bind(this, Window.mSizeN) );
+    td.onpointerdown = this.opStart.bind(this, Window.mSizeN);
     td = document.createElement("td"); tr.appendChild(td);
     td.classList = "sizer-ne";
-    td.addEventListener("mousedown", this.opStart.bind(this, Window.mSizeNE) );
+    td.onpointerdown = this.opStart.bind(this, Window.mSizeNE);
 
     tr = document.createElement("tr"); table.appendChild(tr);
     td = document.createElement("td"); tr.appendChild(td);
     td.classList = "sizer-w";
-    td.addEventListener("mousedown", this.opStart.bind(this, Window.mSizeW) );
+    td.onpointerdown = this.opStart.bind(this, Window.mSizeW);
     td = document.createElement("td"); tr.appendChild(td);
     td = document.createElement("td"); tr.appendChild(td);
     td.classList = "sizer-e";
-    td.addEventListener("mousedown", this.opStart.bind(this, Window.mSizeE) );
+    td.onpointerdown = this.opStart.bind(this, Window.mSizeE);
 
     tr = document.createElement("tr"); table.appendChild(tr);
     td = document.createElement("td"); tr.appendChild(td);
     td.classList = "sizer-sw";
-    td.addEventListener("mousedown", this.opStart.bind(this, Window.mSizeSW) );
+    td.onpointerdown = this.opStart.bind(this, Window.mSizeSW);
     td = document.createElement("td"); tr.appendChild(td);
     td.classList = "sizer-s";
-    td.addEventListener("mousedown", this.opStart.bind(this, Window.mSizeS) );
+    td.onpointerdown = this.opStart.bind(this, Window.mSizeS);
     td = document.createElement("td"); tr.appendChild(td);    
     td.classList = "sizer-se";
-    td.addEventListener("mousedown", this.opStart.bind(this, Window.mSizeSE) );
+    td.onpointerdown = this.opStart.bind(this, Window.mSizeSE);
     
     this.div = document.createElement("div");
     this.div.classList = "window" ;
     this.divBar = document.createElement("div");
     this.divBar.classList = "bar" ;
-    this.divBar.addEventListener("mousedown", this.opStart.bind(this, Window.mMove) );
-    this.divWork = document.createElement("div");
-    this.divWork.classList = "workarea" ;
+    this.divBar.onpointerdown = this.opStart.bind(this, Window.mMove);
+    this.divArea = document.createElement("div");
+    this.divArea.classList = "area" ;
     this.div.appendChild( table );
     this.div.appendChild( this.divBar );
-    this.div.appendChild( this.divWork );
+    this.div.appendChild( this.divArea );
 
-    //  Use an observer to center the window
-    //    Kill it after a while
+    //  Place & size the window
     //
-    this.observer = new ResizeObserver(this.center.bind(this));
+    this.centerX = ( left == undefined ) ;
+    this.centerY = ( top == undefined ) ;
+
+    if ( left   ) this.div.style.left   = left;
+    if ( top    ) this.div.style.top    = top;
+    if ( width  ) this.div.style.width  = width;
+    if ( height ) this.div.style.height = height;
+    if ( title  ) this.setTitleHTML(title);
+
+    //  Use an observer to layout the window
+    //
+    this.observer = new ResizeObserver(this.layout.bind(this));
     this.observer.observe(this.div);
-    setTimeout( this.killObserver.bind(this), 100 );
-    
+
     document.body.appendChild(this.div);
   }
 
-  killObserver ( ) {
-    this.observer.disconnect();
-    this.observer = undefined ;
-  }
-
-  //  Center window
+  //  Layout the window, size the area.
+  //    Use CSS "box-sizing: border-box;" for 'div.window' to get outside box values
   //
-  center ( ) {
-    // let cs = window.getComputedStyle(this.div) ;
-    // let w = this.div.offsetWidth - parseFloat(cs.paddingLeft)
-    //   - parseFloat(cs.paddingRight) - parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth);
-    // let h = this.div.offsetHeight - parseFloat(cs.paddingTop)
-    //   - parseFloat(cs.paddingBottom) - parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth);
-    // w = parseInt(cs.width);
-    // h = parseInt(cs.height);
-    let w = this.div.offsetWidth;
-    let h = this.div.offsetHeight;
-    trace(" r=("+window.innerWidth+","+window.innerHeight+") ");
-    trace(" w="+w+", h="+h);
-    this.div.style.left = window.innerWidth/2-w/2+"px";
-    this.div.style.top = window.innerHeight/2-h/2+"px";
+  layout ( ) {
+    let p = this.divBar.offsetTop ;	//  = padding
+    let t = this.divArea.offsetTop ;	// t-p = bar height
+
+    let h = this.div.offsetHeight - t - p ;
+    let w = this.div.offsetWidth - 2*p ;
+
+    trace("w="+w+", h="+h);
+
+    this.divArea.style.height = h+"px" ;
+    this.divArea.style.width = w+"px" ;
+
+    if ( this.centerX ) {
+      let w = this.div.offsetWidth;
+      this.div.style.left = window.innerWidth/2-w/2+"px";
+    }
+
+    if ( this.centerY ) {
+      let h = this.div.offsetHeight;
+      this.div.style.top = window.innerHeight/2-h/2+"px";
+    }
   }
 
-  //  Start of operation
+  //  Start of operation.
   //    m: transform matrix
   //
   opStart ( m, ev ) {
-    trace(ev.clientX+", "+ev.clientY);
     Window.eatEvent(ev);
+
+    trace(ev.clientX+", "+ev.clientY);
+
+    this.centerX = false ;
+    this.centerY = false ;
 
     //  Put window on top
     //
     document.body.appendChild(this.div);
 
-    let cs = window.getComputedStyle(this.div) ;
-    this.left = parseInt(cs.left) ;
-    this.top = parseInt(cs.top) ;
+    this.left = this.div.offsetLeft ;
+    this.top = this.div.offsetTop ;
+    this.width = this.div.offsetWidth;
+    this.height = this.div.offsetHeight;
 
-    //  NOTE: compute inner width & height to get the same behavior with Firefox
-    //  & Chrome since they handle scroller presence differently.
-    //
-    cs = window.getComputedStyle(this.divWork) ;
-    this.width = this.divWork.offsetWidth - parseFloat(cs.paddingLeft)
-      - parseFloat(cs.paddingRight) - parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth);
-    this.height = this.divWork.offsetHeight - parseFloat(cs.paddingTop)
-      - parseFloat(cs.paddingBottom) - parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth);
-
-    //  Install a ground to catch all events
-    //
-    this.gnd = document.createElement("div");
-    this.gnd.style.position = "absolute";
-    this.gnd.style.left = "0";
-    this.gnd.style.top = "0";
-    this.gnd.style.width = "100%";
-    this.gnd.style.height = "100%";
-    this.gnd.addEventListener("mousemove", this.opApply.bind(this,m) );
-    this.gnd.addEventListener("mouseup", this.opEnd.bind(this) );
-    document.body.appendChild(this.gnd);
+    ev.target.onpointermove = this.opApply.bind(this,m);
+    ev.target.onpointerup = this.opEnd.bind(this);
+    ev.target.setPointerCapture(ev.pointerId);
   }
 
-  //  Apply operation
+  //  Apply operation.
+  //    The observer calls 'layout()' if the size changes.
   //
   opApply ( [dx,dy,dw,dh], ev ) {
     Window.eatEvent(ev);
@@ -173,21 +179,28 @@ class Window {
 
     if ( dx ) { this.left   += dx ; this.div.style.left = this.left+"px" ; }
     if ( dy ) { this.top    += dy ; this.div.style.top  = this.top+"px" ; }
-    if ( dw ) { this.width  += dw ; this.divWork.style.width  = this.width+"px" ; }
-    if ( dh ) { this.height += dh ; this.divWork.style.height = this.height+"px" ; }
+    if ( dw ) { this.width  += dw ; this.div.style.width  = this.width+"px" ; }
+    if ( dh ) { this.height += dh ; this.div.style.height = this.height+"px" ; }
   }
 
-  //  End of operation: remove the ground.
+  //  End of operation
   //
   opEnd ( ev ) {
-    trace();
     Window.eatEvent(ev);
-    document.body.removeChild(this.gnd);
-    this.gnd = undefined ;
+    trace();
+    ev.target.onpointermove = null ;
+    ev.target.releasePointerCapture(ev.pointerId);
   }
 
-  setTitle ( html ) {
+  setTitleHTML ( html ) {
     this.divBar.innerHTML = html ;
+    return this;
+  }
+
+  setChild ( div ) {
+    while ( this.divArea.firstChild )
+      this.divArea.removeChild( this.div.firstChild ) ;
+    this.divArea.appendChild(div);
     return this;
   }
 }

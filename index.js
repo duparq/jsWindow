@@ -28,6 +28,5 @@ function loadScripts ( scripts, fn )
 //  Start application after the last script is loaded.
 //
 window.addEventListener("load", function() {
-  loadScripts(["console.js",
-	       "main.js"]);
+  loadScripts(["main.js"]);
 } );

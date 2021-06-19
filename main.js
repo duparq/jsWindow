@@ -23,15 +23,24 @@ function main ( )
 {
   console.clear();
 
+  loadCss( "Console.css" );
   loadCss( "Window.css" );
   
-  let w = new Window().setTitle("Window 1");
-  
-  w = new Window().setTitle("Console");
-  w.divWork.id = "console";
+  let w = new Window( { title:"<b>Console</b>",
+			left:"100px",
+			top:"100px",
+			width:"600px",
+			height:"300px" } );
 
-  console.redirect(true);
+  let d = document.createElement("div");
+  d.id = "console";
+  w.setChild(d);
+
+  console.redirect(d);
+  
+  new Window( { title:"Window 1" } );
 }
 
 
-loadScripts(["Window.js"], main);
+loadScripts(["Console.js",
+	     "Window.js"], main);
