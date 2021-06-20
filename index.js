@@ -1,27 +1,21 @@
 
 "use strict";
 
-
 //  Load scripts[] one after the other in the specified order.
 //  Call fn after the last script is loaded.
 //
 function loadScripts ( scripts, fn )
 {
-  function next ( ) {
-    let src = scripts.shift();
-    if ( src !== undefined ) {
-//      console.log("Load "+src);
-      let script = document.createElement("script");
-      script.src = src ;
-      script.onload = next ;
-      document.head.appendChild(script);
-    }
-    else
-      if ( fn ) fn();
+  let src = scripts.shift();
+  if ( src !== undefined ) {
+    let script = document.createElement("script");
+    script.src = src ;
+    script.onload = ()=>{ loadScripts(scripts,fn); }
+    document.head.appendChild(script);
   }
-
-  next();
-};
+  else
+    if ( fn ) fn();
+}
 
 
 //  Load all application scripts.

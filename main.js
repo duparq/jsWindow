@@ -35,10 +35,11 @@ function main ( )
   let d = document.createElement("div");
   d.id = "console";
   w.setChild(d);
+  document.body.appendChild( w.div );
 
   console.redirect(d);
   
-  new Window( { title:"Window 1" } );
+  document.body.appendChild( new Window({ title:"Window 1" }).div );
 }
 
 

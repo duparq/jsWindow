@@ -19,11 +19,6 @@ class Window {
   static mSizeSE = [ 0, 0,  1,  1 ];
   static mMove   = [ 1, 1,  0,  0 ];
 
-  static eatEvent ( ev ) {
-    ev.stopPropagation();
-    ev.preventDefault();
-  }
-
   //  Create a new window, append its DIV to the document body
   //
   constructor ( props={} ) {
@@ -102,8 +97,6 @@ class Window {
     //
     this.observer = new ResizeObserver(this.layout.bind(this));
     this.observer.observe(this.div);
-
-    document.body.appendChild(this.div);
   }
 
   //  Layout the window, size the area.
@@ -136,21 +129,29 @@ class Window {
   //    m: transform matrix
   //
   opStart ( m, ev ) {
-    Window.eatEvent(ev);
+    ev.stopPropagation();
+    ev.preventDefault();
 
     trace(ev.clientX+", "+ev.clientY);
 
     this.centerX = false ;
     this.centerY = false ;
 
-    //  Put window on top
+    //  Put window on top inside its parent
     //
-    document.body.appendChild(this.div);
+    this.div.parentNode.appendChild(this.div);
 
-    this.left = this.div.offsetLeft ;
-    this.top = this.div.offsetTop ;
-    this.width = this.div.offsetWidth;
-    this.height = this.div.offsetHeight;
+    this.x0 = ev.clientX ;
+    this.y0 = ev.clientY ;
+    this.left0   = this.div.offsetLeft ;
+    this.top0    = this.div.offsetTop ;
+    this.width0  = this.div.offsetWidth;
+    this.height0 = this.div.offsetHeight;
+
+    this.left   = this.left0   ;
+    this.top    = this.top0    ;
+    this.width  = this.width0  ;
+    this.height = this.height0 ;
 
     ev.target.onpointermove = this.opApply.bind(this,m);
     ev.target.onpointerup = this.opEnd.bind(this);
@@ -161,7 +162,8 @@ class Window {
   //    The observer calls 'layout()' if the size changes.
   //
   opApply ( [dx,dy,dw,dh], ev ) {
-    Window.eatEvent(ev);
+    ev.stopPropagation();
+    ev.preventDefault();
 
     //  Skip 'fake' movements
     //
@@ -170,23 +172,31 @@ class Window {
       return ;
     }
 
-    dx = ev.movementX*dx ;
-    dy = ev.movementY*dy ;
-    dw = ev.movementX*dw ;
-    dh = ev.movementY*dh ;
+    let left   = this.left0   + (ev.clientX - this.x0)*dx ;
+    let top    = this.top0    + (ev.clientY - this.y0)*dy ;
+    let width  = this.width0  + (ev.clientX - this.x0)*dw ;
+    let height = this.height0 + (ev.clientY - this.y0)*dh ;
 
-    trace(ev.movementX+","+ev.movementY+" => "+dx+" "+dy+" "+dw+" "+dh);
+    //  Keep the window inside its parent
+    //
+    let p = this.div.parentNode ;
+    if ( left+width > p.offsetLeft+p.offsetWidth ) left = p.offsetLeft+p.offsetWidth-width;
+    if ( top+height > p.offsetTop+p.offsetHeight ) top = p.offsetTop+p.offsetHeight-height;
+    if ( left < p.offsetLeft ) left = p.offsetLeft;
+    if ( top  < p.offsetTop  ) top  = p.offsetTop;
 
-    if ( dx ) { this.left   += dx ; this.div.style.left = this.left+"px" ; }
-    if ( dy ) { this.top    += dy ; this.div.style.top  = this.top+"px" ; }
-    if ( dw ) { this.width  += dw ; this.div.style.width  = this.width+"px" ; }
-    if ( dh ) { this.height += dh ; this.div.style.height = this.height+"px" ; }
+    if ( left   != this.left   ) { this.left   = left ;   this.div.style.left   = left+"px" ;   }
+    if ( top    != this.top    ) { this.top    = top  ;   this.div.style.top    = top+"px" ;    }
+    if ( width  != this.width  ) { this.width  = width ;  this.div.style.width  = width+"px" ;  }
+    if ( height != this.height ) { this.height = height ; this.div.style.height = height+"px" ; }
   }
 
   //  End of operation
   //
   opEnd ( ev ) {
-    Window.eatEvent(ev);
+    ev.stopPropagation();
+    ev.preventDefault();
+
     trace();
     ev.target.onpointermove = null ;
     ev.target.releasePointerCapture(ev.pointerId);
